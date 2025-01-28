@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const TelegramBot = require("node-telegram-bot-api");
+const cors = require("cors");  // Подключаем CORS
 
 const { MongoClient, ObjectId } = require('mongodb');
 
@@ -16,6 +17,8 @@ const PORT = process.env.PORT || 3001;
 const dbName = "Znaydi"; 
 let collectionName = "users";
 
+// Включаем CORS для всех источников
+app.use(cors());
 
 async function getAllData() {
     const client = new MongoClient(uri, {});
@@ -37,10 +40,8 @@ async function getAllData() {
     } finally {
       await client.close();
     }
-  }
+}
 
-
-  
 app.get('/get_db', async (req, res) => {
     try {
       const data = await getAllData();
@@ -50,15 +51,13 @@ app.get('/get_db', async (req, res) => {
       res.status(500).json({ message: error });
     }
   });
-  
-  app.post('/New', async (req, res) => {
+
+app.post('/New', async (req, res) => {
     console.log(123123)
     await bot.sendMessage(req.body.idtg, `Учень ${req.body.nick} зареєструвався`);
-  });
-  
-  
-  
-  app.put('/put_db/:id', async (req, res) => {
+});
+
+app.put('/put_db/:id', async (req, res) => {
     const id = req.params.id;
     let updatedData = req.body;
     const client = new MongoClient(uri, {});
@@ -80,11 +79,9 @@ app.get('/get_db', async (req, res) => {
     } finally {
       await client.close();
     }
-  });
-  
-  
-  
-  app.post('/push_db', async (req, res) => {
+});
+
+app.post('/push_db', async (req, res) => {
     try {
       const database = client.db(dbName);
       const collection = database.collection(collectionName); 
@@ -101,14 +98,7 @@ app.get('/get_db', async (req, res) => {
       finally {
       client.close();
     }
-  });
-
-
-const but1 = 'Протидія насильству';
-
-const start_key = [
-    [but1],
-];
+});
 
 
 const options = {
@@ -124,13 +114,14 @@ const options = {
       resize_keyboard: true, 
       one_time_keyboard: true  
     }
-  };
+};
+
 bot.on('text', async (nextMsg) => {
     try {
         const chatId = nextMsg.from.id;
         switch (nextMsg.text) {
             case "/start":
-                bot.sendMessage(chatId, "Додаток",options);
+                bot.sendMessage(chatId, "Додаток", options);
                 break;
 
             default:
@@ -142,13 +133,7 @@ bot.on('text', async (nextMsg) => {
     }
 });
 
-
-
 app.use(bodyParser.json());
-
-app.get("/call", async (req, res) => {
-
-});
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);
